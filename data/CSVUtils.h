@@ -17,6 +17,7 @@ public:
             from.erase(0, pos + 1);
             result.emplace_back(token);
         }
+        result.push_back(from);
 
         return result;
     }

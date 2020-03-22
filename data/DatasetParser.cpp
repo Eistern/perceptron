@@ -37,7 +37,7 @@ void DatasetParser::loadParametersDefinition() {
     this->_parametersDefinition = CSVUtils::parseLineToList(parametersDefinition, ';');
 }
 
-void DatasetParser::loadData() {
+void DatasetParser::loadData(const std::vector<std::string>& class_tags) {
     if (!this->_fileStream.is_open() || this->_dataStart == 0)
         throw std::exception();
 
@@ -48,7 +48,7 @@ void DatasetParser::loadData() {
 
     std::string dataString;
     while (std::getline(this->_fileStream, dataString)) {
-        this->_dataset.emplace_back(Data(this->_parametersDefinition, dataString, this->_nanValues));
+        this->_dataset.emplace_back(Data(this->_parametersDefinition, dataString, class_tags, this->_nanValues));
     }
 }
 

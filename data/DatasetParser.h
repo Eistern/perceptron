@@ -23,7 +23,7 @@ public:
 	void loadFile(const std::string& name);
 	void closeFile();
     void loadParametersDefinition();
-    void loadData();
+    void loadData(const std::vector<std::string>& class_tags = std::vector<std::string>(0));
 
     Dataset initDataset() const;
 
