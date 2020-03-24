@@ -3,7 +3,7 @@
 
 HiddenNode::HiddenNode(int connections, float (*activator)(float), float (*d_activator)(float))
         : _activator(activator), _d_activator(d_activator) {
-    this->_weights = std::vector<float>(connections, 0.08f);
+    this->_weights = std::vector<float>(connections, 1.0f);
 }
 
 float HiddenNode::activate(float source) {

@@ -34,14 +34,15 @@ int main(int argc, char** argv) {
     parser.closeFile();
 
     int firstLayerNum = 0;
-    for (const std::string& parameter : test.getParamsNames()) {
+    for (const std::string &parameter : test.getParamsNames()) {
         firstLayerNum += train.getValues(parameter).size();
     }
 
     FullyConnectedPerceptron perceptron;
-    perceptron.addLayer(13, HiddenNode(test.getParamsNames().size(), ActivationFunc::sigmoid, ActivationFunc::dSigmoid));
-    perceptron.addLayer(13, HiddenNode(13, ActivationFunc::sigmoid, ActivationFunc::dSigmoid));
-    perceptron.addLayer(3, HiddenNode(13, ActivationFunc::id, ActivationFunc::dId));
+    perceptron.addLayer(firstLayerNum,
+                        HiddenNode(test.getParamsNames().size(), ActivationFunc::sigmoid, ActivationFunc::dSigmoid));
+    perceptron.addLayer(90, HiddenNode(firstLayerNum, ActivationFunc::sigmoid, ActivationFunc::dSigmoid));
+    perceptron.addLayer(3, HiddenNode(90, ActivationFunc::id, ActivationFunc::dId));
 
     float err_r_t = 1.0f;
     float err_r_v = 1.0f;

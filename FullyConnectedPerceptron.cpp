@@ -13,8 +13,7 @@ std::vector<float> FullyConnectedPerceptron::iterate(const std::vector<float>& i
     this->_previousResult.push_back(input);
     std::vector<float> previous_input = input;
 
-    for (auto layer : this->_layers) {
-        auto node_it = layer.begin();
+    for (const auto &layer : this->_layers) {
         std::vector<float> buff_v;
         buff_v.reserve(layer.size());
 
@@ -41,45 +40,33 @@ std::vector<float> FullyConnectedPerceptron::getForwardWeights(unsigned layer, i
 void FullyConnectedPerceptron::updateWeights(const std::vector<float>& expected) {
     std::vector<float> result = this->_previousResult.back();
     std::vector<std::vector<float>> deltas;
-    deltas.reserve(this->_layers.size());
 
-    auto prev_layer_result = this->_previousResult.rbegin()++;
-    auto r_layers = this->_layers.rbegin();
-
-    auto expected_j = expected.begin();
-    auto result_j = result.begin();
+    int layer_num = (int) this->_layers.size() - 1;
 
     float error_j;
     float delta_j;
     std::vector<float> deltas_j;
-    deltas_j.reserve(r_layers->size());
     int j = 0;
 
-    j = 0;
-    while (expected_j != expected.end() && result_j != result.end()) {
-        if (!std::isnan(*expected_j)) {
-            error_j = (*expected_j - *result_j);
-            delta_j = error_j * (*r_layers)[j].execute_d(*prev_layer_result);
+    for (j = 0; j < expected.size(); ++j) {
+        if (!std::isnan(expected[j])) {
+            error_j = (expected[j] - result[j]);
+            delta_j = error_j *
+                      this->_layers[layer_num][j].execute_d(this->_previousResult[this->_previousResult.size() - 2]);
             deltas_j.push_back(delta_j);
         } else {
             deltas_j.push_back(std::nanf(""));
         }
-        j++;
-        expected_j++;
-        result_j++;
     }
     deltas.push_back(deltas_j);
     //GENERATED DELTAS FOR THE OUTPUT LAYER
 
     deltas_j.clear();
-    prev_layer_result++;
-    r_layers++;
-
-    unsigned layer_num = this->_layers.size() - 2;
+    layer_num--;
 
     auto deltas_it = deltas.begin();
-    while (r_layers != this->_layers.rend()) {
-        for (int i = 0; i < r_layers->size(); ++i) {
+    while (layer_num >= 0) {
+        for (int i = 0; i < this->_layers[layer_num].size(); ++i) {
             std::vector<float> forward_weights = this->getForwardWeights(layer_num, i);
             error_j = 0.0f;
             for (int k = 0; k < forward_weights.size(); ++k) {
@@ -87,15 +74,13 @@ void FullyConnectedPerceptron::updateWeights(const std::vector<float>& expected)
                     error_j += (*deltas_it)[k] * forward_weights[k];
                 }
             }
-            delta_j = error_j * (*r_layers)[i].execute_d(*prev_layer_result);
+            delta_j = error_j * this->_layers[layer_num][i].execute_d(this->_previousResult[layer_num]);
             deltas_j.push_back(delta_j);
         }
         deltas.push_back(deltas_j);
         deltas_j.clear();
 
         deltas_it++;
-        prev_layer_result++;
-        r_layers++;
         layer_num--;
     }
     //GENERATED DELTAS FOR OTHER LAYERS

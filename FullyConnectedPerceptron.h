@@ -6,7 +6,7 @@
 
 class FullyConnectedPerceptron {
 private:
-    constexpr static const float LEARNING_RATE = 0.05f;
+    constexpr static const float LEARNING_RATE = 0.01f;
     std::vector<std::vector<HiddenNode>> _layers;
     std::vector<std::vector<float>> _previousResult;
 
