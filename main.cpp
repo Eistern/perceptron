@@ -33,16 +33,25 @@ int main(int argc, char** argv) {
     Dataset test = parser.initDataset();
     parser.closeFile();
 
+    for (const auto &clazz : classTags) {
+        train.normalize_class(clazz);
+        validation.normalize_class(clazz);
+    }
+
     int firstLayerNum = 0;
     for (const std::string &parameter : test.getParamsNames()) {
         firstLayerNum += train.getValues(parameter).size();
     }
 
     FullyConnectedPerceptron perceptron;
-    perceptron.addLayer(firstLayerNum,
-                        HiddenNode(test.getParamsNames().size(), ActivationFunc::sigmoid, ActivationFunc::dSigmoid));
-    perceptron.addLayer(90, HiddenNode(firstLayerNum, ActivationFunc::sigmoid, ActivationFunc::dSigmoid));
-    perceptron.addLayer(3, HiddenNode(90, ActivationFunc::id, ActivationFunc::dId));
+    const int INPUT_CONNECTIONS = train.getParamsNames().size() - classTags.size();
+    const int FIRST_LAYER = 50;
+    const int SECOND_LAYER = 90;
+    const int THIRD_LAYER = classTags.size();
+
+    perceptron.addLayer(FIRST_LAYER, HiddenNode(INPUT_CONNECTIONS, ActivationFunc::sigmoid, ActivationFunc::dSigmoid));
+    perceptron.addLayer(SECOND_LAYER, HiddenNode(FIRST_LAYER, ActivationFunc::sigmoid, ActivationFunc::dSigmoid));
+    perceptron.addLayer(THIRD_LAYER, HiddenNode(SECOND_LAYER, ActivationFunc::sigmoid, ActivationFunc::dSigmoid));
 
     float err_r_t = 1.0f;
     float err_r_v = 1.0f;
@@ -60,11 +69,11 @@ int main(int argc, char** argv) {
             auto expected = train_case.get_classes_value();
             for (int i = 0; i < result.size(); ++i) {
                 if (!std::isnan(expected[i]))
-                    err_r_t += std::abs(expected[i] - result[i]);
+                    err_r_t += (expected[i] - result[i]) * (expected[i] - result[i]);
             }
             perceptron.updateWeights(expected);
         }
-        err_r_t /= train_data.size();
+        err_r_t /= 2.0f;
 
         printf("error on train:\t%.10f\t", err_r_t);
 
@@ -73,10 +82,10 @@ int main(int argc, char** argv) {
             auto expected = validation_case.get_classes_value();
             for (int i = 0; i < result.size(); ++i) {
                 if (!std::isnan(expected[i]))
-                    err_r_v += std::abs(expected[i] - result[i]);
+                    err_r_v += (expected[i] - result[i]) * (expected[i] - result[i]);
             }
         }
-        err_r_v /= validation_data.size();
+        err_r_v /= 2.0f;
 
         printf("error on validation:\t%.10f\n", err_r_v);
 

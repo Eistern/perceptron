@@ -13,15 +13,21 @@ public:
 	Data(const std::vector<std::string>& tagNames, std::string tagValues, std::vector<std::string> classTags, std::vector<std::string> nanValues);
 	Data(const Data& other);
 
-	Data& operator=(const Data& other);
-    Data& operator=(Data&& other) noexcept;
+    Data &operator=(const Data &other);
 
-    float get_feature(const std::string& feature_name) const;
+    Data &operator=(Data &&other) noexcept;
+
+    float get_feature(const std::string &feature_name) const;
+
+    float get_clazz(const std::string &class_name) const;
 
     std::vector<float> get_classes_value() const;
+
     std::vector<float> get_features_value() const;
 
-	~Data();
+    void set_class_value(const std::string &clazz, float value);
+
+    ~Data();
 };
 
 #endif

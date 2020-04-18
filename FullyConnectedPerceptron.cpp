@@ -64,23 +64,26 @@ void FullyConnectedPerceptron::updateWeights(const std::vector<float>& expected)
     deltas_j.clear();
     layer_num--;
 
-    auto deltas_it = deltas.begin();
+    int delta_layer = 0;
+
     while (layer_num >= 0) {
-        for (int i = 0; i < this->_layers[layer_num].size(); ++i) {
+        int layer_size = this->_layers[layer_num].size();
+        for (int i = 0; i < layer_size; ++i) {
             std::vector<float> forward_weights = this->getForwardWeights(layer_num, i);
             error_j = 0.0f;
             for (int k = 0; k < forward_weights.size(); ++k) {
-                if (!std::isnan((*deltas_it)[k])) {
-                    error_j += (*deltas_it)[k] * forward_weights[k];
+                if (!std::isnan(deltas[delta_layer][k])) {
+                    error_j += deltas[delta_layer][k] * forward_weights[k];
                 }
             }
-            delta_j = error_j * this->_layers[layer_num][i].execute_d(this->_previousResult[layer_num]);
+            HiddenNode node = this->_layers[layer_num][i];
+            delta_j = error_j * node.execute_d(this->_previousResult[layer_num]);
             deltas_j.push_back(delta_j);
         }
         deltas.push_back(deltas_j);
         deltas_j.clear();
 
-        deltas_it++;
+        delta_layer++;
         layer_num--;
     }
     //GENERATED DELTAS FOR OTHER LAYERS

@@ -60,10 +60,22 @@ std::vector<float> Data::get_classes_value() const {
 std::vector<float> Data::get_features_value() const {
     std::vector<float> result;
     result.reserve(this->_features.size());
-    for (const auto& feature : this->_features) {
+    for (const auto &feature : this->_features) {
         result.push_back(feature.second);
     }
     return result;
+}
+
+void Data::set_class_value(const std::string &clazz, float value) {
+    this->_classes[clazz] = value;
+}
+
+float Data::get_clazz(const std::string &class_name) const {
+    auto result = this->_classes.find(class_name);
+    if (result == this->_classes.end())
+        throw std::exception();
+
+    return result->second;
 }
 
 Data::~Data() = default;

@@ -3,7 +3,7 @@
 
 HiddenNode::HiddenNode(int connections, float (*activator)(float), float (*d_activator)(float))
         : _activator(activator), _d_activator(d_activator) {
-    this->_weights = std::vector<float>(connections, 1.0f);
+    this->_weights = std::vector<float>(connections, 0.01f);
 }
 
 float HiddenNode::activate(float source) {
@@ -54,7 +54,7 @@ float HiddenNode::getWeight(int index) const {
     return this->_weights[index];
 }
 
-void HiddenNode::update(float learning_rate, float delta, const std::vector<float> &prev_results) {
+void HiddenNode::update(const float learning_rate, const float delta, const std::vector<float> &prev_results) {
     if (std::isnan(delta))
         return;
     for (int i = 0; i < prev_results.size(); ++i) {
