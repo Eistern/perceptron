@@ -22,7 +22,7 @@ public:
 
     int getSize() const;
 
-    const std::vector<std::string> &getParamsNames() const;
+    const std::vector<std::string> &get_params_names() const;
 
     const std::vector<Data> &getCases() const;
 

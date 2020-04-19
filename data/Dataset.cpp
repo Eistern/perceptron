@@ -24,7 +24,7 @@ std::vector<float> Dataset::getValues(const std::string &parameter) const {
     return result;
 }
 
-const std::vector<std::string> &Dataset::getParamsNames() const {
+const std::vector<std::string> &Dataset::get_params_names() const {
     return this->_params;
 }
 

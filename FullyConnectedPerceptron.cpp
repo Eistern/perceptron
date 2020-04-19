@@ -37,7 +37,7 @@ std::vector<float> FullyConnectedPerceptron::getForwardWeights(unsigned layer, i
     return result;
 }
 
-void FullyConnectedPerceptron::updateWeights(const std::vector<float>& expected) {
+void FullyConnectedPerceptron::update_weights(const std::vector<float> &expected) {
     std::vector<float> result = this->_previousResult.back();
     std::vector<std::vector<float>> deltas;
 
