@@ -1,4 +1,5 @@
 #include <iostream>
+#include <valarray>
 #include "data/DatasetParser.h"
 #include "FullyConnectedPerceptron.h"
 #include "ActivationFunc.h"
@@ -53,41 +54,48 @@ int main(int argc, char** argv) {
     perceptron.addLayer(SECOND_LAYER, HiddenNode(FIRST_LAYER, ActivationFunc::sigmoid, ActivationFunc::dSigmoid));
     perceptron.addLayer(THIRD_LAYER, HiddenNode(SECOND_LAYER, ActivationFunc::sigmoid, ActivationFunc::dSigmoid));
 
-    float err_r_t = 1.0f;
-    float err_r_v = 1.0f;
+    std::valarray<float> error_train = std::valarray<float>(classTags.size(), 1.0f);
+    std::valarray<float> error_validation = std::valarray<float>(classTags.size(), 1.0f);
+    float root_error = 0;
     int epoch_num = 0;
 
     std::vector<Data> train_data = train.getCases();
     std::vector<Data> validation_data = validation.getCases();
-    while (err_r_t > 0.01f || err_r_v > 0.01f) {
-        err_r_t = 0.0f;
-        err_r_v = 0.0f;
+    while (error_train.max() > 0.01f || error_validation.max() > 0.01f) {
+        error_train = 0.0f;
+        error_validation = 0.0f;
         printf("Epoch %d:\t", epoch_num);
 
-        for (const auto& train_case : train_data) {
+        for (const auto &train_case : train_data) {
             auto result = perceptron.iterate(train_case.get_features_value());
             auto expected = train_case.get_classes_value();
             for (int i = 0; i < result.size(); ++i) {
-                if (!std::isnan(expected[i]))
-                    err_r_t += (expected[i] - result[i]) * (expected[i] - result[i]);
+                if (!std::isnan(expected[i])) {
+                    error_train[i] += (expected[i] - result[i]) * (expected[i] - result[i]);
+                    root_error += (expected[i] - result[i]) * (expected[i] - result[i]);
+                }
             }
             perceptron.updateWeights(expected);
         }
-        err_r_t /= 2.0f;
+        error_train /= 2.0f;
+        root_error /= train_data.size();
+        root_error = std::sqrt(root_error);
 
-        printf("error on train:\t%.10f\t", err_r_t);
+        printf("error on train:\t%.10f\t", error_train.max());
 
-        for (const auto& validation_case : validation_data) {
+        for (const auto &validation_case : validation_data) {
             auto result = perceptron.iterate(validation_case.get_features_value());
             auto expected = validation_case.get_classes_value();
             for (int i = 0; i < result.size(); ++i) {
                 if (!std::isnan(expected[i]))
-                    err_r_v += (expected[i] - result[i]) * (expected[i] - result[i]);
+                    error_validation[i] += (expected[i] - result[i]) * (expected[i] - result[i]);
             }
+            perceptron.updateWeights(expected);
         }
-        err_r_v /= 2.0f;
+        error_validation /= 2.0f;
 
-        printf("error on validation:\t%.10f\n", err_r_v);
+        printf("error on validation:\t%.10f\t", error_validation.max());
+        printf("rmse for epoch:\t%.10f\n", root_error);
 
         epoch_num++;
     }
