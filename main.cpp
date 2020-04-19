@@ -54,16 +54,17 @@ int main(int argc, char** argv) {
     perceptron.addLayer(SECOND_LAYER, HiddenNode(FIRST_LAYER, ActivationFunc::sigmoid, ActivationFunc::dSigmoid));
     perceptron.addLayer(THIRD_LAYER, HiddenNode(SECOND_LAYER, ActivationFunc::sigmoid, ActivationFunc::dSigmoid));
 
-    std::valarray<float> error_train = std::valarray<float>(classTags.size(), 1.0f);
-    std::valarray<float> error_validation = std::valarray<float>(classTags.size(), 1.0f);
+    std::vector<float> error_train = std::vector<float>(classTags.size(), 1.0f);
+    std::vector<float> error_validation = std::vector<float>(classTags.size(), 1.0f);
     float root_error = 0;
     int epoch_num = 0;
 
     std::vector<Data> train_data = train.getCases();
     std::vector<Data> validation_data = validation.getCases();
-    while (error_train.max() > 0.01f || error_validation.max() > 0.01f) {
-        error_train = 0.0f;
-        error_validation = 0.0f;
+    while (*std::max_element(error_train.begin(), error_train.end()) > 0.01f ||
+           *std::max_element(error_validation.begin(), error_validation.end()) > 0.01f) {
+        std::fill(error_train.begin(), error_train.end(), 0.0f);
+        std::fill(error_validation.begin(), error_validation.end(), 0.0f);
         printf("Epoch %d:\t", epoch_num);
 
         for (const auto &train_case : train_data) {
@@ -77,11 +78,12 @@ int main(int argc, char** argv) {
             }
             perceptron.updateWeights(expected);
         }
-        error_train /= 2.0f;
+        std::transform(error_train.begin(), error_train.end(), error_train.begin(),
+                       [](float e) -> float { return e / 2.0f; });
         root_error /= train_data.size();
         root_error = std::sqrt(root_error);
 
-        printf("error on train:\t%.10f\t", error_train.max());
+        printf("error on train:\t%.10f\t", *std::max_element(error_train.begin(), error_train.end()));
 
         for (const auto &validation_case : validation_data) {
             auto result = perceptron.iterate(validation_case.get_features_value());
@@ -90,11 +92,11 @@ int main(int argc, char** argv) {
                 if (!std::isnan(expected[i]))
                     error_validation[i] += (expected[i] - result[i]) * (expected[i] - result[i]);
             }
-            perceptron.updateWeights(expected);
         }
-        error_validation /= 2.0f;
+        std::transform(error_validation.begin(), error_validation.end(), error_validation.begin(),
+                       [](float e) -> float { return e / 2.0f; });
 
-        printf("error on validation:\t%.10f\t", error_validation.max());
+        printf("error on validation:\t%.10f\t", *std::max_element(error_validation.begin(), error_validation.end()));
         printf("rmse for epoch:\t%.10f\n", root_error);
 
         epoch_num++;
