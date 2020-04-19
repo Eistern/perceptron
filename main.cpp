@@ -10,7 +10,7 @@ int main(int argc, char** argv) {
     }
 
     DatasetParser parser({"", "-"});
-    std::vector<std::string> classTags = {"Udel'naya plotnost' gaza ", "G_total", "KGF"};
+    std::vector<std::string> classTags = {"G_total", "KGF"};
 
     parser.loadFile(argv[1]);
     parser.loadParametersDefinition();
