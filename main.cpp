@@ -55,7 +55,8 @@ int main(int argc, char** argv) {
 
     float error_train = 1.0f;
     float error_validation = 1.0f;
-    float root_error = 0.0f;
+    float root_error_train = 0.0f;
+    float root_error_validate = 0.0f;
     int epoch_num = 0;
 
     std::vector<Data> train_data = train.getCases();
@@ -63,7 +64,8 @@ int main(int argc, char** argv) {
     while (error_train > 0.01f || error_validation > 0.01f) {
         error_train = 0.0f;
         error_validation = 0.0f;
-        root_error = 0.0f;
+        root_error_train = 0.0f;
+        root_error_validate = 0.0f;
         printf("Epoch %d:\t", epoch_num);
 
         for (const auto &train_case : train_data) {
@@ -73,14 +75,14 @@ int main(int argc, char** argv) {
             for (int i = 0; i < result.size(); ++i) {
                 if (!std::isnan(expected[i])) {
                     error_train += (expected[i] - result[i]) * (expected[i] - result[i]);
-                    root_error += (expected[i] - result[i]) * (expected[i] - result[i]);
+                    root_error_train += (expected[i] - result[i]) * (expected[i] - result[i]);
                 }
             }
             perceptron.update_weights(expected);
         }
         error_train /= 2.0f;
-        root_error /= train_data.size();
-        root_error = std::sqrt(root_error);
+        root_error_train /= train_data.size();
+        root_error_train = std::sqrt(root_error_train);
 
         printf("error on train:\t%.10f\t", error_train);
 
@@ -89,14 +91,20 @@ int main(int argc, char** argv) {
             auto expected = validation_case.get_classes_value();
 
             for (int i = 0; i < result.size(); ++i) {
-                if (!std::isnan(expected[i]))
+                if (!std::isnan(expected[i])) {
                     error_validation += (expected[i] - result[i]) * (expected[i] - result[i]);
+                    root_error_validate += (expected[i] - result[i]) * (expected[i] - result[i]);
+                }
             }
+            perceptron.update_weights(expected);
         }
         error_validation /= 2.0f;
+        root_error_validate /= validation_data.size();
+        root_error_validate = std::sqrt(root_error_validate);
 
         printf("error on validation:\t%.10f\t", error_validation);
-        printf("RMSE for epoch:\t%.10f\n", root_error);
+        printf("RMSE-train for epoch:\t%.10f\t", root_error_train);
+        printf("RMSE-validate for epoch:\t%.10f\n", root_error_validate);
 
         epoch_num++;
     }
